@@ -4,7 +4,10 @@ FROM python:3.10-slim-buster
 WORKDIR /app
 
 # Install git
-RUN apt-get update && apt-get install -y git
+RUN sed -i 's|deb.debian.org/debian|archive.debian.org/debian|g' /etc/apt/sources.list \
+ && sed -i '/security.debian.org/s|security.debian.org|archive.debian.org|g' /etc/apt/sources.list \
+ && echo 'Acquire::Check-Valid-Until "false";' > /etc/apt/apt.conf.d/99no-check-valid \
+ && apt-get update && apt-get install -y git
 
 # Qui' sotto metti il link del mediaflow-proxy che vuoi utilizzare opuure lascialo cosi se vuoi utilizzare quello originale
 # nel caso hai un tuo MFP diverso sostituisci https://github.com/mhdzumair/mediaflow-proxy con il tuo lasciando invariato quello che viene dopo
@@ -22,7 +25,9 @@ RUN rm -rf temp_mediaflow temp_hfmfp
 # Copy the local config.json file to the container
 
 # Install any needed packages specified in requirements.txt
-RUN pip install --no-cache-dir -r requirements.txt
+RUN pip install --no-cache-dir -r requirements.txt \
+ && pip install --no-cache-dir psutil
+
 
 EXPOSE 7860
 
